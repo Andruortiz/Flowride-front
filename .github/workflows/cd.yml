@@ -19,28 +19,13 @@ env:
   APP_BORDE: ca-flowride-borde
 
 jobs:
-  calidad:
-    name: Lint y compilación
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
-
-      - run: npm ci
-
-      - run: npm run lint
-
-      - run: npm run build
-        env:
-          VITE_KEYCLOAK_URL: ${{ vars.KEYCLOAK_URL }}
+  ci:
+    name: CI
+    uses: ./.github/workflows/ci.yml
 
   desplegar:
     name: Desplegar el panel
-    needs: calidad
+    needs: ci
     runs-on: ubuntu-latest
     environment:
       name: produccion
