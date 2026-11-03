@@ -21,19 +21,39 @@ export default function Dashboard() {
         refetchInterval: 10_000,
     })
 
-    if (ind.error) return <p>{ind.error.message}</p>
+    if (ind.error) return <p className="error">{ind.error.message}</p>
+
+    const tarjetas = [
+        ['Solicitudes', ind.data?.solicitudes],
+        ['Finalizadas', ind.data?.finalizadas],
+        ['Canceladas', ind.data?.canceladas],
+        ['Sin conductor', ind.data?.sinConductor],
+    ]
 
     return (
         <>
-            <h2>Últimos 30 días</h2>
-            <ul>
-                <li>Solicitudes: {ind.data?.solicitudes}</li>
-                <li>Finalizadas: {ind.data?.finalizadas}</li>
-                <li>Canceladas: {ind.data?.canceladas}</li>
-                <li>Sin conductor: {ind.data?.sinConductor}</li>
-            </ul>
-            <h2>Alertas sin leer</h2>
-            {alertas.data?.map(a => <p key={a.id}><b>{a.titulo}</b>: {a.detalle}</p>)}
+            <div className="encabezado">
+                <h2>Resumen operativo</h2>
+                <p>Indicadores de los últimos 30 días</p>
+            </div>
+            <div className="indicadores">
+                {tarjetas.map(([texto, valor]) => (
+                    <div className="indicador" key={texto}>
+                        <span>{texto}</span>
+                        <strong>{valor ?? '–'}</strong>
+                    </div>
+                ))}
+            </div>
+            <div className="panel">
+                <div className="panel-cabecera"><h3>Alertas sin leer</h3></div>
+                {alertas.data?.length === 0 && <p className="vacio">No hay alertas pendientes.</p>}
+                {alertas.data?.map(a => (
+                    <div className="alerta" key={a.id}>
+                        <b>{a.titulo}</b>
+                        <small>{a.detalle}</small>
+                    </div>
+                ))}
+            </div>
         </>
     )
 }
