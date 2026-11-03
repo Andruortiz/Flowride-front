@@ -20,7 +20,7 @@ export default function Solicitudes() {
     const lista = useQuery({
         queryKey: ['solicitudes', estado],
         queryFn: () => api<Solicitud[]>(`/solicitudes?tamano=100${estado ? `&estado=${estado}` : ''}`),
-        refetchInterval: 10_000,
+        refetchInterval: 60_000,
     })
     const refrescar = () => cliente.invalidateQueries({ queryKey: ['solicitudes'] })
     const asignar = useMutation({ mutationFn: (id: string) => api(`/solicitudes/${id}/asignar`, {}), onSuccess: refrescar })

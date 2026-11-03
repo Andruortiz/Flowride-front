@@ -35,12 +35,12 @@ export default function Viajes() {
     const lista = useQuery({
         queryKey: ['viajes', estado],
         queryFn: () => api<Viaje[]>(`/viajes?tamano=100${estado ? `&estado=${estado}` : ''}`),
-        refetchInterval: 10_000,
+        refetchInterval: 60_000,
     })
     const ubicaciones = useQuery({
         queryKey: ['ubicaciones'],
         queryFn: () => api<Ubicacion[]>('/ubicaciones/ultimas'),
-        refetchInterval: 10_000,
+        refetchInterval: 60_000,
     })
 
     return (

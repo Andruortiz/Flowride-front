@@ -15,7 +15,7 @@ export default function Alertas() {
     const lista = useQuery({
         queryKey: ['alertas', soloNoLeidas],
         queryFn: () => api<Alerta[]>(`/alertas?soloNoLeidas=${soloNoLeidas}&tamano=100`),
-        refetchInterval: 10_000,
+        refetchInterval: 60_000,
     })
     const leer = useMutation({
         mutationFn: (id: string) => api(`/alertas/${id}/leida`, {}),

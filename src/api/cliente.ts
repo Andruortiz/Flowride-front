@@ -3,7 +3,7 @@ import { authority, clientId } from '../auth/config.ts'
 
 const clave = `oidc.user:${authority}:${clientId}`
 
-function token() {
+export function token() {
     const raw = sessionStorage.getItem(clave)
     return raw ? User.fromStorageString(raw).access_token : undefined
 }
