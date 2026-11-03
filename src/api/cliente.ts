@@ -1,6 +1,7 @@
 import { User } from 'oidc-client-ts'
+import { authority, clientId } from '../auth/config.ts'
 
-const clave = 'oidc.user:http://localhost:8080/realms/flowride:flowride-panel'
+const clave = `oidc.user:${authority}:${clientId}`
 
 function token() {
     const raw = sessionStorage.getItem(clave)
