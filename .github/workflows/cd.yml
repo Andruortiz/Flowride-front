@@ -1,0 +1,78 @@
+name: CD
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  ACR_NOMBRE: flowrideadom1
+  AZURE_GRUPO: rg-flowride-demo
+  APP_PANEL: ca-flowride-panel
+  APP_BORDE: ca-flowride-borde
+
+jobs:
+  ci:
+    name: CI
+    uses: ./.github/workflows/ci.yml
+
+  desplegar:
+    name: Desplegar el panel
+    needs: ci
+    runs-on: ubuntu-latest
+    environment:
+      name: produccion
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Calcular la referencia de la imagen
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          SHA7="${GITHUB_SHA::7}"
+          echo "REFERENCIA=${ACR_NOMBRE}.azurecr.io/flowride-panel:${VERSION}-${SHA7}" >> "$GITHUB_ENV"
+
+      - name: Construir
+        run: |
+          docker build \
+            --build-arg VITE_KEYCLOAK_URL="${{ vars.KEYCLOAK_URL }}" \
+            --label "org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}" \
+            --label "org.opencontainers.image.revision=${{ github.sha }}" \
+            -t "$REFERENCIA" .
+
+      - name: Iniciar sesión en Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Iniciar sesión en el registro
+        run: az acr login --name "$ACR_NOMBRE"
+
+      - name: Publicar
+        run: docker push "$REFERENCIA"
+
+      - name: Habilitar la extensión de Container Apps
+        run: az config set extension.use_dynamic_install=yes_without_prompt
+
+      - name: Actualizar el panel
+        run: |
+          az containerapp update \
+            --resource-group "$AZURE_GRUPO" \
+            --name "$APP_PANEL" \
+            --image "$REFERENCIA"
+
+      - name: Prueba de humo
+        run: |
+          FQDN=$(az containerapp show --resource-group "$AZURE_GRUPO" --name "$APP_BORDE" --query properties.configuration.ingress.fqdn -o tsv)
+          curl --fail --silent --show-error --retry 12 --retry-delay 10 --retry-all-errors "https://${FQDN}/" -o /dev/null
