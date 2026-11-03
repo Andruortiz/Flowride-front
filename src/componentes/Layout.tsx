@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from 'react-oidc-context'
+import { useTiempoReal } from '../api/tiempoReal.ts'
 
 const icono = (trazo: ReactNode) => <svg viewBox="0 0 24 24" aria-hidden="true">{trazo}</svg>
 
@@ -28,6 +29,7 @@ const titulos = Object.fromEntries(secciones.flatMap(s => s.items.map(i => [i.ru
 export default function Layout() {
     const auth = useAuth()
     const { pathname } = useLocation()
+    useTiempoReal()
     const nombre = auth.user?.profile.preferred_username ?? ''
 
     return (

@@ -18,7 +18,7 @@ export default function Dashboard() {
     const alertas = useQuery({
         queryKey: ['alertas'],
         queryFn: () => api<Alerta[]>('/alertas'),
-        refetchInterval: 10_000,
+        refetchInterval: 60_000,
     })
 
     if (ind.error) return <p className="error">{ind.error.message}</p>

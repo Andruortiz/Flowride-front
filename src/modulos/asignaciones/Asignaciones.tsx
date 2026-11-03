@@ -16,7 +16,7 @@ export default function Asignaciones() {
     const lista = useQuery({
         queryKey: ['asignaciones', estado],
         queryFn: () => api<Asignacion[]>(`/asignaciones?tamano=100${estado ? `&estado=${estado}` : ''}`),
-        refetchInterval: 10_000,
+        refetchInterval: 60_000,
     })
 
     return (
